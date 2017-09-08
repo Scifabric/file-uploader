@@ -1,0 +1,22 @@
+<!doctype html>
+
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+
+  <title>PYBOSSA file uploader</title>
+  <meta name="description" content="PYBOSSA file-uploader">
+  <meta name="author" content="Scifabric">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+</head>
+
+<body>
+    <div id="fileuploader">
+        <file-uploader></file-uploader>
+    </div>
+</body>
+<% for(var i=0; i<htmlWebpackPlugin.files.js.length; i++) {%>
+   <script src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
+<% } %>
+</html>
