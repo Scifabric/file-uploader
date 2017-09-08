@@ -2,7 +2,7 @@
     <div class="container">
         <h1 class="title is-1">Upload pictures to PYBOSSA</h1>
         <b-field label="Project Name">
-            <b-select placeholder="Select a name" v-model="filter">
+            <b-select placeholder="Select a name" v-model="project_id">
                 <option
                       v-for="option in projectNameOptions"
                       :value="option.id"
@@ -12,7 +12,7 @@
             </b-select>
         </b-field>
         <b-field label="Project's camera">
-            <b-select placeholder="Select a camera">
+            <b-select placeholder="Select a camera" v-model="camera_id">
                 <option
                       v-for="option in projectCameras"
                       :value="option.cameraID"
@@ -34,7 +34,8 @@ export default {
     data(){
         return {
             projects: [],
-            filter: null,
+            project_id: null,
+            camera_id: null
             }
     },
     components: {Dropzone},
@@ -48,7 +49,7 @@ export default {
             return tmp
         },
         projectCameras(){
-            let project = _.find(this.projects, {id: this.filter})
+            let project = _.find(this.projects, {id: this.project_id})
             if (project) return project.info.cameras
             else return []
         }
