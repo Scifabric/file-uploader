@@ -16,7 +16,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with PYBOSSA.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify, render_template, json 
 from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
 import os
@@ -44,9 +44,9 @@ def allowed_file(filename):
 @app.route('/projects')
 def projects():
     projects = pbclient.find_project(api_key=settings.APIKEY,
-                                     all=True, published=True,
+                                     all=1, published=True,
                                      limit=100)
-    data = [project.__dict__ for project in projects]
+    data = [project.__dict__['data'] for project in projects]
     return jsonify(data)
 
 @app.route('/upload', methods=['POST'])
