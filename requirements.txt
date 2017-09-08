@@ -1,3 +1,4 @@
 flask
 pybossa-client
 piexif
+boto

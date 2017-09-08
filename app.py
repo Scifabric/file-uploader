@@ -15,15 +15,15 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with PYBOSSA.  If not, see <http://www.gnu.org/licenses/>.
-
-from flask import Flask, request, jsonify, render_template, json
-from flask import send_from_directory, redirect, url_for
-from werkzeug import secure_filename
 import os
 import pbclient
 import settings
 import piexif
+from flask import Flask, request, jsonify, render_template, json
+from flask import send_from_directory, redirect, url_for
+from werkzeug import secure_filename
 from piexif._exeptions import InvalidImageDataError
+from s3 import upload_to_s3
 
 
 app = Flask(__name__)
@@ -72,6 +72,7 @@ def upload():
             piexif.remove(path)
         except InvalidImageDataError:
             exif = 'This image types does not support EXIF'
+        upload_to_s3(filename)
         return jsonify(dict(status='ok', exif=exif))
 
 if __name__ == '__main__': # pragma: no cover
