@@ -1,25 +1,68 @@
 <template>
-    <div>
-        <h1>Upload pictures to PYBOSSA</h1>
-        <dropzone id="myVueDropzone" url="/upload" acceptedFileTypes='image/*' maxFileSizeInMB=10 maxNumberOfFiles=1000>
-            <input type="hidden" v-model="project">
-        </dropzone>
+    <div class="container">
+        <h1 class="title is-1">Upload pictures to PYBOSSA</h1>
+        <b-field label="Project Name">
+            <b-select placeholder="Select a name" v-model="filter">
+                <option
+                      v-for="option in projectNameOptions"
+                      :value="option.id"
+                      :key="option.id">
+                {{ option.name}}
+                </option>
+            </b-select>
+        </b-field>
+        <b-field label="Project's camera">
+            <b-select placeholder="Select a camera">
+                <option
+                      v-for="option in projectCameras"
+                      :value="option.cameraID"
+                      :key="option.cameraID">
+                {{ option.cameraID}}
+                </option>
+            </b-select>
+        </b-field>
+        <dropzone id="myVueDropzone" url="/upload" acceptedFileTypes='image/*' 
+                                     :maxFileSizeInMB=10 :maxNumberOfFiles=1000></dropzone>
+
     </div>
 </template>
 <script>
 import Dropzone from 'vue2-dropzone'
 import axios from 'axios'
+import _ from 'lodash'
 export default {
     data(){
-        return {projects: []}
+        return {
+            projects: [],
+            filter: null,
+            }
     },
     components: {Dropzone},
+    computed: {
+        projectNameOptions(){
+            var tmp = []
+            for (var project of this.projects) {
+                console.log(project)
+                tmp.push({id: project.id, name: project.short_name})
+            }
+            return tmp
+        },
+        projectCameras(){
+            let project = _.find(this.projects, {id: this.filter})
+            if (project) return project.info.cameras
+            else return []
+        }
+    },
     created(){
         var url = '/projects'
         var self = this
         axios.get(url)
             .then(response => {
                 self.projects = response.data
+                var projectNames = []
+                for (var project of self.projects) {
+                    projectNames.push({id: project.id, name: project.short_name})
+                }
             })
             .catch(error => {console.log(error)})
     }

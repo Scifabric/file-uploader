@@ -12,9 +12,9 @@
 </head>
 
 <body>
-    <div id="fileuploader">
+    <section id="fileuploader" class="section">
         <file-uploader></file-uploader>
-    </div>
+    </section>
 </body>
 <% for(var i=0; i<htmlWebpackPlugin.files.js.length; i++) {%>
    <script src="<%= htmlWebpackPlugin.files.js[i] %>"></script>
