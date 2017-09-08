@@ -16,15 +16,18 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with PYBOSSA.  If not, see <http://www.gnu.org/licenses/>.
 
-from flask import Flask, request, jsonify, render_template, json 
+from flask import Flask, request, jsonify, render_template, json
 from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
 import os
 import pbclient
 import settings
+import piexif
+from piexif._exeptions import InvalidImageDataError
 
 
 app = Flask(__name__)
+
 
 pbclient.set('apikey', settings.APIKEY)
 pbclient.set('endpoint', settings.SERVER_NAME)
@@ -51,6 +54,9 @@ def projects():
 
 @app.route('/upload', methods=['POST'])
 def upload():
+    project_id = request.form['project_id']
+    camera_id = request.form['camera_id']
+    print project_id, camera_id
     if 'file' not in request.files:
         flash('No file part')
         return jsonify('No file part')
@@ -59,8 +65,14 @@ def upload():
         return jsonify('No file')
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(settings.UPLOAD_DIR, filename))
-        return jsonify(dict(status='ok'))
+        path = os.path.join(settings.UPLOAD_DIR, filename)
+        file.save(path)
+        exif = 'removed'
+        try:
+            piexif.remove(path)
+        except InvalidImageDataError:
+            exif = 'This image types does not support EXIF'
+        return jsonify(dict(status='ok', exif=exif))
 
 if __name__ == '__main__': # pragma: no cover
     app.debug = True

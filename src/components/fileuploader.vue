@@ -21,8 +21,13 @@
                 </option>
             </b-select>
         </b-field>
-        <dropzone id="myVueDropzone" url="/upload" acceptedFileTypes='image/*' 
-                                     :maxFileSizeInMB=10 :maxNumberOfFiles=1000></dropzone>
+        <dropzone id="myVueDropzone" 
+                  url="/upload" acceptedFileTypes='image/*' 
+                  :maxFileSizeInMB=10 
+                  :maxNumberOfFiles=1000>
+                <input type="hidden" name="project_id" v-model="project_id">
+                <input type="hidden" name="camera_id" v-model="camera_id">
+        </dropzone>
 
     </div>
 </template>
