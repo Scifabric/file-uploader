@@ -20,11 +20,14 @@ from flask import Flask, request, jsonify, render_template
 from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
 import os
+import pbclient
 import settings
 
 
 app = Flask(__name__)
 
+pbclient.set('apikey', settings.APIKEY)
+pbclient.set('endpoint', settings.SERVER_NAME)
 
 @app.route('/')
 def index():
@@ -37,6 +40,14 @@ def send_js(path):
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in settings.ALLOWED_EXTENSIONS
+
+@app.route('/projects')
+def projects():
+    projects = pbclient.find_project(api_key=settings.APIKEY,
+                                     all=True, published=True,
+                                     limit=100)
+    data = [project.__dict__ for project in projects]
+    return jsonify(data)
 
 @app.route('/upload', methods=['POST'])
 def upload():
