@@ -22,7 +22,7 @@
             </b-select>
         </b-field>
         <dropzone id="myVueDropzone" 
-                  url="/upload" acceptedFileTypes='image/*' 
+                  url="/upload" acceptedFileTypes='image/*,.h264'
                   :maxFileSizeInMB=10 
                   :maxNumberOfFiles=1000>
                 <input type="hidden" name="project_id" v-model="project_id">

@@ -15,6 +15,7 @@
 #
 # You should have received a copy of the GNU Affero General Public License
 # along with PYBOSSA.  If not, see <http://www.gnu.org/licenses/>.
+import magic
 import os
 import pbclient
 import settings
@@ -24,7 +25,8 @@ from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
 from piexif._exeptions import InvalidImageDataError
 from s3 import upload_to_s3
-
+from video import handle_video
+from tasks import check_exists
 
 app = Flask(__name__)
 
@@ -67,15 +69,22 @@ def upload():
         filename = secure_filename(file.filename)
         path = os.path.join(settings.UPLOAD_DIR, filename)
         file.save(path)
+        mime = magic.from_file(path, mime=True)
+        isvideo = True
+        if 'image' in mime:
+            isvideo = False
         exif = 'removed'
-        try:
-            piexif.remove(path)
-        except InvalidImageDataError:
-            exif = 'This image types does not support EXIF'
+        if isvideo:
+            handle_video(filename)
+        else:
+            try:
+                piexif.remove(path)
+            except InvalidImageDataError:
+                exif = 'This image types does not support EXIF'
+            if check_exists(path) is False:
+                data_url = upload_to_s3(path, filename)
+                # create_task(project_id, data, isvideo, link_raw=link_raw)
         # Check if the image has been already uploaded
-        if check_exists(path) is False:
-            upload_to_s3(filename)
-            create_task(pbclient, project_id, data)
         return jsonify(dict(status='ok', exif=exif))
 
 if __name__ == '__main__': # pragma: no cover

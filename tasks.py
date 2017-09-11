@@ -20,9 +20,23 @@ import settings
 import imagehash
 import requests
 
-def create_task(pbclient, project_id, data):
+def create_task(pbclient, project_id, data, isvideo, **kwargs):
     """Create a task."""
-    pass
+
+    # info = dict(title=timestamped_filename,
+    #             link_raw=url,
+    #             filename=timestamped_filename,
+    #             url_m=url,
+    #             link=url,
+    #             url_b=url,
+    #             email_from=task['email_from'],
+    #             email_subject=task['email_subject'],
+    #             email_date=task['email_date'],
+    #             image=url,
+    #             video=video_url,
+    #             isvideo=task['isvideo'],
+    #             content_type=task['content_type']
+    #                     )
 
 def check_exists(data):
     """Check if exists already."""

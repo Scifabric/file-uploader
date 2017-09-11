@@ -21,16 +21,15 @@ import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
-def upload_to_s3(file):
+def upload_to_s3(local_filelocation, s3_filename):
     con = S3Connection(settings.AWS_ACCESS_KEY,
                        settings.AWS_SECRET_KEY)
     bucket = con.get_bucket(settings.S3_BUCKET)
     bucket.set_acl('public-read')
-    s3_filelocation = os.path.join(settings.S3_FOLDER, file)
-    local_file = os.path.join(settings.UPLOAD_DIR, file)
+    s3_filelocation = os.path.join(settings.S3_FOLDER, s3_filename)
     k = Key(bucket)
     k.key = s3_filelocation
-    k.set_contents_from_filename(local_file)
+    k.set_contents_from_filename(local_filelocation)
     k.set_acl('public-read')
     url = k.generate_url(expires_in=0, query_auth=False)
     return url

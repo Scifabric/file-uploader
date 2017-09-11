@@ -2,3 +2,7 @@ flask
 pybossa-client
 piexif
 boto
+ImageHash
+python-magic
+sh
+
