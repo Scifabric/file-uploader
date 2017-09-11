@@ -26,12 +26,12 @@ from werkzeug import secure_filename
 from piexif._exeptions import InvalidImageDataError
 from s3 import upload_to_s3
 from video import handle_video
-from tasks import check_exists
+from tasks import check_exists, create_task
 
 app = Flask(__name__)
 
 
-pbclient.set('apikey', settings.APIKEY)
+pbclient.set('api_key', settings.APIKEY)
 pbclient.set('endpoint', settings.SERVER_NAME)
 
 @app.route('/')
@@ -75,7 +75,14 @@ def upload():
             isvideo = False
         exif = 'removed'
         if isvideo:
-            handle_video(filename)
+            video_url, thumbnail_url = handle_video(filename)
+            tmp = dict(project_id=13,
+                       filename=filename,
+                       url=thumbnail_url,
+                       video_url=video_url,
+                       isvideo=True,
+                       content_type="video/mp4")
+            task = create_task(pbclient,**tmp)
         else:
             try:
                 piexif.remove(path)
@@ -83,9 +90,16 @@ def upload():
                 exif = 'This image types does not support EXIF'
             if check_exists(path) is False:
                 data_url = upload_to_s3(path, filename)
-                # create_task(project_id, data, isvideo, link_raw=link_raw)
+                tmp = dict(project_id=13,
+                           filename=filename,
+                           url=data_url,
+                           video_url=None,
+                           isvideo=False,
+                           content_type=mime)
+                task = create_task(pbclient,**tmp)
         # Check if the image has been already uploaded
-        return jsonify(dict(status='ok', exif=exif))
+        return jsonify(dict(status='ok', exif=exif,
+                            task=task.__dict__['data']))
 
 
 if __name__ == '__main__':  # pragma: no cover
