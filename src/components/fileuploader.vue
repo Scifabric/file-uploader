@@ -21,14 +21,47 @@
                 </option>
             </b-select>
         </b-field>
-        <dropzone id="myVueDropzone" 
+        <dropzone ref="myuploader" id="myVueDropzone" 
                   url="/upload" acceptedFileTypes='image/*,.h264'
                   :maxFileSizeInMB=10 
-                  :maxNumberOfFiles=1000>
+                  :maxNumberOfFiles=1000
+                  v-on:vdropzone-success="showIt">
                 <input type="hidden" name="project_id" v-model="project_id">
                 <input type="hidden" name="camera_id" v-model="camera_id">
         </dropzone>
+        <h2 class="title is-2">List of created tasks</h2>
+        <b-table
+            :data="isEmpty ? [] : tableDataSimple"
+            >
 
+            <template scope="props">
+                <b-table-column label="ID" width="40" numeric>
+                    <a :href="apiUrl(props.row.id)" target="_blank">{{ props.row.id }}</a>
+                </b-table-column>
+
+                <b-table-column label="link">
+                    <a :href="props.row.info.link" target="_blank">{{ props.row.info.link}}</a>
+                </b-table-column>
+
+                <b-table-column label="Video link" centered>
+                    <a :ref="props.row.info.video" target="_blank">{{ props.row.info.video }}</a>
+                </b-table-column>
+            </template>
+
+            <template slot="empty">
+                <section class="section">
+                    <div class="content has-text-grey has-text-centered">
+                        <p>
+                            <b-icon
+                                icon="sentiment_very_dissatisfied"
+                                size="is-large">
+                            </b-icon>
+                        </p>
+                        <p>Nothing here.</p>
+                    </div>
+                </section>
+            </template>
+        </b-table>
     </div>
 </template>
 <script>
@@ -40,7 +73,9 @@ export default {
         return {
             projects: [],
             project_id: null,
-            camera_id: null
+            camera_id: null,
+            tableDataSimple: [],
+            isEmpty: true,
             }
     },
     components: {Dropzone},
@@ -59,6 +94,17 @@ export default {
             else return []
         }
     },
+    methods: {
+        showIt(file, response) {
+            console.log(file)
+            console.log(response)
+            this.isEmpty = false
+            this.tableDataSimple.push(response.task)
+        },
+        apiUrl(id) {
+            return "https://instantwildadmin.zsl.org/api/task/" + id
+        }
+    },
     created(){
         var url = '/projects'
         var self = this
@@ -71,6 +117,6 @@ export default {
                 }
             })
             .catch(error => {console.log(error)})
-    }
+    },
 }
 </script>
