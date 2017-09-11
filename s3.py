@@ -21,6 +21,7 @@ import boto
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
+
 def upload_to_s3(local_filelocation, s3_filename):
     con = S3Connection(settings.AWS_ACCESS_KEY,
                        settings.AWS_SECRET_KEY)

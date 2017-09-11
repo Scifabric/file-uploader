@@ -87,6 +87,7 @@ def upload():
         # Check if the image has been already uploaded
         return jsonify(dict(status='ok', exif=exif))
 
-if __name__ == '__main__': # pragma: no cover
+
+if __name__ == '__main__':  # pragma: no cover
     app.debug = True
     app.run()
