@@ -76,7 +76,7 @@ def upload():
         exif = 'removed'
         if isvideo:
             video_url, thumbnail_url = handle_video(filename)
-            tmp = dict(project_id=13,
+            tmp = dict(project_id=project_id,
                        filename=filename,
                        url=thumbnail_url,
                        video_url=video_url,
@@ -90,7 +90,7 @@ def upload():
                 exif = 'This image types does not support EXIF'
             if check_exists(path) is False:
                 data_url = upload_to_s3(path, filename)
-                tmp = dict(project_id=13,
+                tmp = dict(project_id=project_id,
                            filename=filename,
                            url=data_url,
                            video_url=None,
