@@ -106,7 +106,7 @@ export default {
         }
     },
     created(){
-        var url = '/projects'
+        var url = 'https://instantwildadmin.zsl.org/api/project?all=1&published=true'
         var self = this
         axios.get(url)
             .then(response => {
