@@ -1,2 +1,9 @@
 ALLOWED_EXTENSIONS = ['jpeg', 'png', 'jpg']
 UPLOAD_DIR = '/tmp/upload'
+SERVER_NAME = 'https://server.com'
+APIKEY = 'apikey'
+S3_BUCKET = 'bucket'
+S3_FOLDER = 'folderinbucket'
+AWS_ACCESS_KEY = 'KEY'
+AWS_SECRET_KEY = 'SECRET'
+PUBLISHED = False
