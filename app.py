@@ -96,7 +96,7 @@ def upload():
                 piexif.remove(path)
             except InvalidImageDataError:
                 exif = 'This image types does not support EXIF'
-            image_exists, ahash = check_exists(path)
+            image_exists, ahash, task = check_exists(path)
             if image_exists is False:
                 data_url = upload_to_s3(path, filename)
                 tmp = dict(project_id=project_id,
@@ -108,9 +108,11 @@ def upload():
                            ahash=ahash,
                            content_type=mime)
                 task = create_task(pbclient,**tmp)
-        # Check if the image has been already uploaded
-        return jsonify(dict(status='ok', exif=exif,
-                            task=task.__dict__['data']))
+                return jsonify(dict(status='ok', exif=exif,
+                                    task=task.__dict__['data']))
+            else:
+                return jsonify(dict(status='ok', exif=exif,
+                                    task=task))
 
 
 if __name__ == '__main__':  # pragma: no cover
