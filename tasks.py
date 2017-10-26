@@ -55,9 +55,11 @@ def check_exists(data):
     url = settings.SERVER_NAME + '/api/task'
     params = dict(api_key=settings.APIKEY,
                   info=query,
-                  fulltextsearch=1)
+                  fulltextsearch=1,
+                  all=1)
     response = requests.get(url, params=params)
     if len(response.json()) >= 1:
-        return True, ahash
+        task = response.json()[0]
+        return True, ahash, task
     else:
-        return False, ahash
+        return False, ahash, None
