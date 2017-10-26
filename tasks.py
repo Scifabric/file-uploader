@@ -29,21 +29,28 @@ def create_task(pbclient, **kwargs):
                 url_m=kwargs['url'],
                 link=kwargs['url'],
                 url_b=kwargs['url'],
+                cameraID=kwargs['camera_id'],
                 email_from="File Uploader",
                 email_subject="File Uploader",
                 email_date="File Uploader",
                 image=kwargs['url'],
+                ahash=kwargs['ahash'],
                 video=kwargs['video_url'],
                 isvideo=kwargs['isvideo'],
                 content_type=kwargs['content_type'])
     return pbclient.create_task(kwargs['project_id'],
                                 info=info)
 
+def get_ahash(data):
+    """Generates image ahash."""
+    img = Image.open(data)
+    ahash = str(imagehash.average_hash(img))
+    return ahash
+
 
 def check_exists(data):
     """Check if exists already."""
-    img = Image.open(data)
-    ahash = str(imagehash.average_hash(img))
+    ahash = get_ahash(data)
     query = 'ahash::%s' % ahash
     url = settings.SERVER_NAME + '/api/task'
     params = dict(api_key=settings.APIKEY,
@@ -51,6 +58,6 @@ def check_exists(data):
                   fulltextsearch=1)
     response = requests.get(url, params=params)
     if len(response.json()) >= 1:
-        return True
+        return True, ahash
     else:
-        return False
+        return False, ahash

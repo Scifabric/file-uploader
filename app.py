@@ -63,7 +63,6 @@ def projects():
 def upload():
     project_id = request.form['project_id']
     camera_id = request.form['camera_id']
-    print project_id, camera_id
     if 'file' not in request.files:
         flash('No file part')
         return jsonify('No file part')
@@ -88,6 +87,8 @@ def upload():
                        url=thumbnail_url,
                        video_url=video_url,
                        isvideo=True,
+                       camera_id=camera_id,
+                       ahash=None,
                        content_type="video/mp4")
             task = create_task(pbclient,**tmp)
         else:
@@ -95,13 +96,16 @@ def upload():
                 piexif.remove(path)
             except InvalidImageDataError:
                 exif = 'This image types does not support EXIF'
-            if check_exists(path) is False:
+            image_exists, ahash = check_exists(path)
+            if image_exists is False:
                 data_url = upload_to_s3(path, filename)
-                tmp = dict(project_id=13,
+                tmp = dict(project_id=project_id,
                            filename=filename,
                            url=data_url,
                            video_url=None,
                            isvideo=False,
+                           camera_id=camera_id,
+                           ahash=ahash,
                            content_type=mime)
                 task = create_task(pbclient,**tmp)
         # Check if the image has been already uploaded
