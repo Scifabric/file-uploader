@@ -48,9 +48,14 @@ def allowed_file(filename):
 
 @app.route('/projects')
 def projects():
-    projects = pbclient.find_project(api_key=settings.APIKEY,
-                                     all=1, published=True,
-                                     limit=100)
+    if settings.PUBLISHED:
+        projects = pbclient.find_project(api_key=settings.APIKEY,
+                                         all=1, published=True,
+                                         limit=100)
+    else:
+        projects = pbclient.find_project(api_key=settings.APIKEY,
+                                         all=1,
+                                         limit=100)
     data = [project.__dict__['data'] for project in projects]
     return jsonify(data)
 
@@ -67,6 +72,8 @@ def upload():
         return jsonify('No file')
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
+        if not os.path.exists(settings.UPLOAD_DIR):
+            os.makedirs(settings.UPLOAD_DIR)
         path = os.path.join(settings.UPLOAD_DIR, filename)
         file.save(path)
         mime = magic.from_file(path, mime=True)
@@ -90,7 +97,7 @@ def upload():
                 exif = 'This image types does not support EXIF'
             if check_exists(path) is False:
                 data_url = upload_to_s3(path, filename)
-                tmp = dict(project_id=project_id,
+                tmp = dict(project_id=13,
                            filename=filename,
                            url=data_url,
                            video_url=None,
