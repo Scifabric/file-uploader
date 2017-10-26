@@ -23,7 +23,7 @@ import piexif
 from flask import Flask, request, jsonify, render_template, json
 from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
-from piexif._exeptions import InvalidImageDataError
+from piexif._exceptions import InvalidImageDataError
 from s3 import upload_to_s3
 from video import handle_video
 from tasks import check_exists, create_task
