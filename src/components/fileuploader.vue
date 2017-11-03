@@ -21,13 +21,26 @@
                 </option>
             </b-select>
         </b-field>
+        <b-field label="Deployments">
+            <b-select placeholder="Select a deployment" v-model="deploymentLocationID">
+                <option
+                      v-for="option in projectLocations"
+                      :value="option.deploymentLocationID"
+                      :key="option.deploymentLocationID">
+                {{ option.deploymentLocationID }}
+                </option>
+            </b-select>
+        </b-field>
+
         <dropzone ref="myuploader" id="myVueDropzone" 
                   url="/upload" acceptedFileTypes='image/*,.h264'
                   :maxFileSizeInMB=10 
                   :maxNumberOfFiles=1000
                   v-on:vdropzone-success="showIt">
                 <input type="hidden" name="project_id" v-model="project_id">
+                <input type="hidden" name="project_name" v-model="project_name">
                 <input type="hidden" name="camera_id" v-model="camera_id">
+                <input type="hidden" name="deploymentLocationID" v-model="deploymentLocationID">
         </dropzone>
         <h2 class="title is-2">List of created tasks</h2>
         <b-table
@@ -74,25 +87,40 @@ export default {
             projects: [],
             project_id: null,
             camera_id: null,
+            deploymentLocationID: null,
             tableDataSimple: [],
             isEmpty: true,
             }
     },
     components: {Dropzone},
     computed: {
+        project_name() {
+            let project = _.find(this.projects, {id: this.project_id})
+            if (project !== undefined) {
+                return project.name
+            }
+            else {
+                return ""
+            }
+        },
         projectNameOptions(){
             var tmp = []
             for (var project of this.projects) {
-                console.log(project)
                 tmp.push({id: project.id, name: project.short_name})
             }
             return tmp
         },
         projectCameras(){
             let project = _.find(this.projects, {id: this.project_id})
-            if (project) return project.info.cameras
+            if (project && project.info.cameras) return project.info.cameras
+            else return []
+        },
+        projectLocations(){
+            let project = _.find(this.projects, {id: this.project_id})
+            if (project && project.info.deploymentlocations) return project.info.deploymentlocations
             else return []
         }
+
     },
     methods: {
         showIt(file, response) {
@@ -118,5 +146,11 @@ export default {
             })
             .catch(error => {console.log(error)})
     },
+    watch: {
+        'project_id': function(newVal) {
+            this.deploymentLocationID = null
+            this.camera_id = null
+        }
+    }
 }
 </script>

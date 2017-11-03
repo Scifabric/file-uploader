@@ -23,7 +23,7 @@ import piexif
 from flask import Flask, request, jsonify, render_template, json
 from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
-from piexif._exceptions import InvalidImageDataError
+from piexif._exeptions import InvalidImageDataError
 from s3 import upload_to_s3
 from video import handle_video
 from tasks import check_exists, create_task
@@ -62,7 +62,11 @@ def projects():
 @app.route('/upload', methods=['POST'])
 def upload():
     project_id = request.form['project_id']
-    camera_id = request.form['camera_id']
+    project_name = request.form['project_name']
+    camera_id = request.form['camera_id'] or None
+    deploymentLocationID = request.form['deploymentLocationID']
+    if deploymentLocationID is None or deploymentLocationID == '':
+        deploymentLocationID = project_name
     if 'file' not in request.files:
         flash('No file part')
         return jsonify('No file part')
@@ -89,7 +93,8 @@ def upload():
                        isvideo=True,
                        camera_id=camera_id,
                        ahash=None,
-                       content_type="video/mp4")
+                       content_type="video/mp4",
+                       deploymentLocationID=deploymentLocationID)
             task = create_task(pbclient,**tmp)
         else:
             try:
@@ -106,7 +111,8 @@ def upload():
                            isvideo=False,
                            camera_id=camera_id,
                            ahash=ahash,
-                           content_type=mime)
+                           content_type=mime,
+                           deploymentLocationID=deploymentLocationID)
                 task = create_task(pbclient,**tmp)
                 return jsonify(dict(status='ok', exif=exif,
                                     task=task.__dict__['data']))

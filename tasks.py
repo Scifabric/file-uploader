@@ -37,7 +37,8 @@ def create_task(pbclient, **kwargs):
                 ahash=kwargs['ahash'],
                 video=kwargs['video_url'],
                 isvideo=kwargs['isvideo'],
-                content_type=kwargs['content_type'])
+                content_type=kwargs['content_type'],
+                deploymentLocationID=kwargs['deploymentLocationID'])
     return pbclient.create_task(kwargs['project_id'],
                                 info=info)
 
