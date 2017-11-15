@@ -20,6 +20,7 @@ import os
 import pbclient
 import settings
 import piexif
+from PIL import Image
 from flask import Flask, request, jsonify, render_template, json
 from flask import send_from_directory, redirect, url_for
 from werkzeug import secure_filename
@@ -79,6 +80,10 @@ def upload():
             os.makedirs(settings.UPLOAD_DIR)
         path = os.path.join(settings.UPLOAD_DIR, filename)
         file.save(path)
+        # Resize file to settings size
+        thumbnail = Image.open(file)
+        thumbnail.thumbnail(settings.THUMBNAIL)
+        thumbnail.save(path)
         mime = magic.from_file(path, mime=True)
         isvideo = True
         if 'image' in mime:
