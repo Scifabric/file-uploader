@@ -80,6 +80,14 @@ def upload():
             os.makedirs(settings.UPLOAD_DIR)
         path = os.path.join(settings.UPLOAD_DIR, filename)
         file.save(path)
+        # Get from Exif DateTimeOriginal
+        exif_dict = piexif.load(path)
+        exif_dict.pop('thumbnail')
+        data_d = {}
+        for ifd in exif_dict:
+            data_d[ifd] = {
+                piexif.TAGS[ifd][tag]["name"]: exif_dict[ifd][tag]
+                for tag in exif_dict[ifd]}
         # Resize file to settings size
         thumbnail = Image.open(file)
         thumbnail.thumbnail(settings.THUMBNAIL)
@@ -104,8 +112,10 @@ def upload():
         else:
             try:
                 piexif.remove(path)
+                Create_time = data_d['Exif']['DateTimeOriginal']
             except InvalidImageDataError:
                 exif = 'This image types does not support EXIF'
+                Create_time = None
             image_exists, ahash, task = check_exists(path)
             if image_exists is False:
                 data_url = upload_to_s3(path, filename)
@@ -117,8 +127,9 @@ def upload():
                            camera_id=camera_id,
                            ahash=ahash,
                            content_type=mime,
+                           Create_time=Create_time,
                            deploymentLocationID=deploymentLocationID)
-                task = create_task(pbclient,**tmp)
+                task = create_task(pbclient, **tmp)
                 return jsonify(dict(status='ok', exif=exif,
                                     task=task.__dict__['data']))
             else:
