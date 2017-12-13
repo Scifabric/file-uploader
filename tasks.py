@@ -38,6 +38,7 @@ def create_task(pbclient, **kwargs):
                 video=kwargs['video_url'],
                 isvideo=kwargs['isvideo'],
                 content_type=kwargs['content_type'],
+                Create_time=kwargs['Create_time'],
                 deploymentLocationID=kwargs['deploymentLocationID'])
     return pbclient.create_task(kwargs['project_id'],
                                 info=info)
