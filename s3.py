@@ -18,6 +18,7 @@
 import os
 import settings
 import boto
+import re
 from boto.s3.connection import S3Connection
 from boto.s3.key import Key
 
@@ -33,4 +34,6 @@ def upload_to_s3(local_filelocation, s3_filename):
     k.set_contents_from_filename(local_filelocation)
     k.set_acl('public-read')
     url = k.generate_url(expires_in=0, query_auth=False)
+    if settings.CLOUDFRONT:
+        url = re.sub(r".*\.amazonaws.com/", settings.CLOUDFRONT, url)
     return url

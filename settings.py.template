@@ -1,4 +1,4 @@
-ALLOWED_EXTENSIONS = ['jpeg', 'png', 'jpg']
+ALLOWED_EXTENSIONS = ['jpeg', 'png', 'jpg', 'h264', 'mp4']
 UPLOAD_DIR = '/tmp/upload'
 SERVER_NAME = 'https://server.com'
 APIKEY = 'apikey'
@@ -8,3 +8,4 @@ AWS_ACCESS_KEY = 'KEY'
 AWS_SECRET_KEY = 'SECRET'
 PUBLISHED = False
 THUMBNAIL = 800, 600
+CLOUDFRONT = None

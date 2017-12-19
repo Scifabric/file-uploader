@@ -118,6 +118,9 @@ def upload():
             except InvalidImageDataError:
                 exif = 'This image types does not support EXIF'
                 Create_time = None
+            except KeyError:
+                exif = 'This image types does not support EXIF'
+                Create_time = None
             image_exists, ahash, task = check_exists(path)
             if image_exists is False:
                 data_url = upload_to_s3(path, filename)
