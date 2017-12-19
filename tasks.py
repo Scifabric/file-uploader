@@ -19,9 +19,14 @@ from PIL import Image
 import settings
 import imagehash
 import requests
+import datetime
 
 def create_task(pbclient, **kwargs):
     """Create a task."""
+
+    if kwargs.get('Create_time') is None:
+        now = datetime.datetime.utcnow().isoformat()
+        kwargs['Create_time'] = now
 
     info = dict(title=kwargs['filename'],
                 link_raw=kwargs['url'],

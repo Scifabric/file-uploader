@@ -44,7 +44,10 @@ def handle_video(filename):
                         '5', '-vsync', 'vfr', '-vf',
                         'fps=fps=1/600', '-y', '-f',
                         'mjpeg', thumbnail.name))
-        mp4_filename = filename.split('h264')[0] + 'mp4'
+        if 'h264' in filename:
+            mp4_filename = filename.split('h264')[0] + 'mp4'
+        else:
+            mp4_filename = filename
         video_url = upload_to_s3(outputvideo.name, mp4_filename)
         thumbnail_url = upload_to_s3(thumbnail.name, mp4_filename + '.jpg')
         return (video_url, thumbnail_url)

@@ -1,6 +1,6 @@
 <template>
     <div class="container">
-        <h1 class="title is-1">Upload pictures to PYBOSSA</h1>
+        <h1 class="title is-1">Upload pictures or videos to PYBOSSA</h1>
         <b-field label="Project Name">
             <b-select placeholder="Select a name" v-model="project_id">
                 <option
@@ -33,7 +33,7 @@
         </b-field>
 
         <dropzone ref="myuploader" id="myVueDropzone" 
-                  url="/upload" acceptedFileTypes='image/*,.h264'
+                  url="/upload" acceptedFileTypes='image/*,.h264,.mp4'
                   :maxFileSizeInMB=10 
                   :maxNumberOfFiles=1000
                   v-on:vdropzone-success="showIt">

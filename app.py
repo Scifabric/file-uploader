@@ -80,23 +80,10 @@ def upload():
             os.makedirs(settings.UPLOAD_DIR)
         path = os.path.join(settings.UPLOAD_DIR, filename)
         file.save(path)
-        # Get from Exif DateTimeOriginal
-        exif_dict = piexif.load(path)
-        exif_dict.pop('thumbnail')
-        data_d = {}
-        for ifd in exif_dict:
-            data_d[ifd] = {
-                piexif.TAGS[ifd][tag]["name"]: exif_dict[ifd][tag]
-                for tag in exif_dict[ifd]}
-        # Resize file to settings size
-        thumbnail = Image.open(file)
-        thumbnail.thumbnail(settings.THUMBNAIL)
-        thumbnail.save(path)
         mime = magic.from_file(path, mime=True)
         isvideo = True
         if 'image' in mime:
             isvideo = False
-        exif = 'removed'
         if isvideo:
             video_url, thumbnail_url = handle_video(filename)
             tmp = dict(project_id=project_id,
@@ -108,9 +95,24 @@ def upload():
                        ahash=None,
                        content_type="video/mp4",
                        deploymentLocationID=deploymentLocationID)
-            task = create_task(pbclient,**tmp)
+            task = create_task(pbclient, **tmp)
+            return jsonify(dict(status='ok', exif=None,
+                                task=task.__dict__['data']))
         else:
             try:
+                # Get from Exif DateTimeOriginal
+                exif_dict = piexif.load(path)
+                exif_dict.pop('thumbnail')
+                data_d = {}
+                for ifd in exif_dict:
+                    data_d[ifd] = {
+                        piexif.TAGS[ifd][tag]["name"]: exif_dict[ifd][tag]
+                        for tag in exif_dict[ifd]}
+                # Resize file to settings size
+                thumbnail = Image.open(file)
+                thumbnail.thumbnail(settings.THUMBNAIL)
+                thumbnail.save(path)
+                exif = 'removed'
                 piexif.remove(path)
                 Create_time = data_d['Exif']['DateTimeOriginal']
             except InvalidImageDataError:
