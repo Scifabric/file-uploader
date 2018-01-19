@@ -20,8 +20,9 @@ import settings
 import imagehash
 import requests
 import datetime
-# import time
-# import calendar
+import time
+import calendar
+
 
 def create_task(pbclient, **kwargs):
     """Create a task."""
@@ -31,9 +32,9 @@ def create_task(pbclient, **kwargs):
     res = requests.get(url)
 
     if res.headers['X-RateLimit-Remaining'] < 50:
-       # remaining = (calendar.timegm(time.gmtime()) -
-       #              res.headers['X-RateLimit-Reset'])
-       time.sleep(30)
+        remaining = (calendar.timegm(time.gmtime()) -
+                     res.headers['X-RateLimit-Reset'])
+        time.sleep(remaining)
 
     if kwargs.get('Create_time') is None:
         now = datetime.datetime.utcnow().isoformat()
