@@ -151,9 +151,7 @@ export default {
           return n.info.filename === data.task.info.filename
         })
 
-        // this.tableDataSimple[index] = data.task
         this.tableDataSimple.splice(index, 1, data.task)
-        // this.tableDataSimple.push(data.task)
       }
     },
     created(){

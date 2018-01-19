@@ -5,4 +5,5 @@ boto
 ImageHash
 python-magic
 sh
-
+eventlet
+flask-socketio
