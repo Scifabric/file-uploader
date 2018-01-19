@@ -143,6 +143,8 @@ export default {
     sockets: {
       connect() {
         console.log('connected to socketio')
+        console.log('Joining room:' + this.room)
+        this.$socket.emit('join', {room: this.room})
       },
       jobStatus (data) {
         console.log('job completed')
@@ -156,8 +158,6 @@ export default {
     },
     created(){
         this.room = uid.sync(18)
-        this.$socket.emit('join', {room: this.room})
-        console.log('Joining room:' + this.room)
         var url = '/projects'
         var self = this
         axios.get(url)

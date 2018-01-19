@@ -41,8 +41,6 @@ socketio = SocketIO(app)
 q = Queue(connection=Redis())
 fq = FailedQueue(connection=Redis())
 
-r = Redis()
-
 pbclient.set('api_key', settings.APIKEY)
 pbclient.set('endpoint', settings.SERVER_NAME)
 
@@ -101,27 +99,10 @@ def upload():
                       filename=filename,
                       path=path,
                       room=room)
-        job = q.enqueue(async_upload, **kwargs)
-        tmp = r.get('file-uploader-jobs')
-        if tmp:
-            tmp = json.loads(tmp)
-            tmp.append(job.id)
-            r.set('file-uploader-jobs', json.dumps(tmp))
-        else:
-            r.set('file-uploader-jobs', json.dumps([job.id]))
-        print('http://localhost:5000/job/%s" % job.id')
+        job = q.enqueue(async_upload, timeout=15*60, **kwargs)
         return jsonify({'jobId': job.id})
     else:
         return "ERROR"
-
-
-@app.route('/job/<string:oid>')
-def job(oid):
-    j = q.fetch_job(oid)
-    if j.result:
-        return jsonify(j.result)
-    else:
-        return jsonify({})
 
 
 @app.route('/jobstatus')
