@@ -7,7 +7,7 @@ import VueSocketio from 'vue-socket.io'
 
 Vue.use(VueFormGenerator)
 Vue.use(Buefy)
-Vue.use(VueSocketio, `http://${document.domain}:${location.port}`)
+Vue.use(VueSocketio, `${location.protocol}//${document.domain}:${location.port}`)
 
 new Vue({
     el: '#fileuploader',
