@@ -8,3 +8,4 @@ sh
 eventlet
 flask-socketio
 rq
+socketIO_client
