@@ -7,3 +7,4 @@ python-magic
 sh
 eventlet
 flask-socketio
+python-rq
