@@ -22,15 +22,24 @@ import settings
 import piexif
 from PIL import Image
 from flask import Flask, request, jsonify, render_template, json
-from flask import send_from_directory, redirect, url_for
+from flask import send_from_directory, redirect, url_for, session
 from werkzeug import secure_filename
 from piexif._exceptions import InvalidImageDataError
 from s3 import upload_to_s3
 from video import handle_video
 from tasks import check_exists, create_task
+from redis import Redis
+from rq import Queue
+from rq.queue import FailedQueue
+from jobs import async_upload
+from flask_socketio import SocketIO, send, emit, join_room, leave_room
 
 app = Flask(__name__)
 
+socketio = SocketIO(app)
+
+q = Queue(connection=Redis())
+fq = FailedQueue(connection=Redis())
 
 pbclient.set('api_key', settings.APIKEY)
 pbclient.set('endpoint', settings.SERVER_NAME)
@@ -60,12 +69,14 @@ def projects():
     data = [project.__dict__['data'] for project in projects]
     return jsonify(data)
 
+
 @app.route('/upload', methods=['POST'])
 def upload():
     project_id = request.form['project_id']
     project_name = request.form['project_name']
     camera_id = request.form['camera_id'] or None
     deploymentLocationID = request.form['deploymentLocationID']
+    room = request.form['room']
     if deploymentLocationID is None or deploymentLocationID == '':
         deploymentLocationID = project_name
     if 'file' not in request.files:
@@ -80,68 +91,61 @@ def upload():
             os.makedirs(settings.UPLOAD_DIR)
         path = os.path.join(settings.UPLOAD_DIR, filename)
         file.save(path)
-        mime = magic.from_file(path, mime=True)
-        isvideo = True
-        if 'image' in mime:
-            isvideo = False
-        if isvideo:
-            video_url, thumbnail_url = handle_video(filename)
-            tmp = dict(project_id=project_id,
-                       filename=filename,
-                       url=thumbnail_url,
-                       video_url=video_url,
-                       isvideo=True,
-                       camera_id=camera_id,
-                       ahash=None,
-                       content_type="video/mp4",
-                       deploymentLocationID=deploymentLocationID)
-            task = create_task(pbclient, **tmp)
-            return jsonify(dict(status='ok', exif=None,
-                                task=task.__dict__['data']))
-        else:
-            try:
-                # Get from Exif DateTimeOriginal
-                exif_dict = piexif.load(path)
-                exif_dict.pop('thumbnail')
-                data_d = {}
-                for ifd in exif_dict:
-                    data_d[ifd] = {
-                        piexif.TAGS[ifd][tag]["name"]: exif_dict[ifd][tag]
-                        for tag in exif_dict[ifd]}
-                # Resize file to settings size
-                thumbnail = Image.open(file)
-                thumbnail.thumbnail(settings.THUMBNAIL)
-                thumbnail.save(path)
-                exif = 'removed'
-                piexif.remove(path)
-                Create_time = data_d['Exif']['DateTimeOriginal']
-            except InvalidImageDataError:
-                exif = 'This image types does not support EXIF'
-                Create_time = None
-            except KeyError:
-                exif = 'This image types does not support EXIF'
-                Create_time = None
-            image_exists, ahash, task = check_exists(path)
-            if image_exists is False:
-                data_url = upload_to_s3(path, filename)
-                tmp = dict(project_id=project_id,
-                           filename=filename,
-                           url=data_url,
-                           video_url=None,
-                           isvideo=False,
-                           camera_id=camera_id,
-                           ahash=ahash,
-                           content_type=mime,
-                           Create_time=Create_time,
-                           deploymentLocationID=deploymentLocationID)
-                task = create_task(pbclient, **tmp)
-                return jsonify(dict(status='ok', exif=exif,
-                                    task=task.__dict__['data']))
+
+        kwargs = dict(project_id=project_id,
+                      project_name=project_name,
+                      camera_id=camera_id,
+                      deploymentLocationID=deploymentLocationID,
+                      filename=filename,
+                      path=path,
+                      room=room)
+        job = q.enqueue(async_upload, timeout=15*60, **kwargs)
+        return jsonify({'jobId': job.id})
+    else:
+        return "ERROR"
+
+
+@app.route('/jobstatus')
+def completed():
+    pending = []
+    completed = []
+    error = []
+    job_ids = r.get('file-uploader-jobs')
+    if job_ids:
+        jobs = json.loads(job_ids)
+        for jobID in jobs:
+            job = q.fetch_job(jobID)
+            if (job.result):
+                completed.append(job.result)
             else:
-                return jsonify(dict(status='ok', exif=exif,
-                                    task=task))
+                pending.append(job.id)
+    failed = fq.get_jobs()
+    for f in failed:
+        error.append(f.id)
+    res = dict(pending=pending,
+               completed=completed,
+               error=error)
+    return jsonify(res)
+
+
+@socketio.on('jobcompleted')
+def handle_job_completed(data):
+    print('Job COMPLETED ' + str(data))
+    emit('jobStatus', data, room=data['room'])
+
+
+@socketio.on('join')
+def handle_join(data):
+    join_room(data['room'])
+    print("User joined room %s" % data['room'])
+
+
+@socketio.on('leave')
+def handle_join(data):
+    leave_room(data['room'])
 
 
 if __name__ == '__main__':  # pragma: no cover
     app.debug = True
-    app.run()
+    # app.run()
+    socketio.run(app)

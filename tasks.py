@@ -20,9 +20,21 @@ import settings
 import imagehash
 import requests
 import datetime
+import time
+import calendar
+
 
 def create_task(pbclient, **kwargs):
     """Create a task."""
+
+    url = '%s/api/task?api_key=%s' % (settings.SERVER_NAME,
+                                      settings.APIKEY)
+    res = requests.get(url)
+
+    if res.headers['X-RateLimit-Remaining'] < 50:
+        remaining = (calendar.timegm(time.gmtime()) -
+                     res.headers['X-RateLimit-Reset'])
+        time.sleep(remaining)
 
     if kwargs.get('Create_time') is None:
         now = datetime.datetime.utcnow().isoformat()
