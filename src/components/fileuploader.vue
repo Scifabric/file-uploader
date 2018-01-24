@@ -43,25 +43,22 @@
                 <input type="hidden" name="room" v-model="room">
                 <input type="hidden" name="deploymentLocationID" v-model="deploymentLocationID">
         </dropzone>
-        <h2 class="title is-2">List of created tasks</h2>
+        <h2 class="title is-2" style="margin-top:5px;">List of created tasks <span v-if="processingData.length >= 1" class="tag is-info is-large is-pulled-right">Processing {{processingData.length}} files</span></h2>
         <b-table
             :data="isEmpty ? [] : tableDataSimple"
             >
 
             <template scope="props">
                 <b-table-column label="ID" width="40" numeric>
-                    <button v-if="props.row.id === 'processing'" class="button is-white is-loading" disabled> Processing </button>
-                    <a v-else :href="apiUrl(props.row.id)" target="_blank">{{ props.row.id }}</a>
+                    <a v-if="props.row.id !== 'processing'" :href="apiUrl(props.row.id)" target="_blank">{{ props.row.id }}</a>
                 </b-table-column>
 
                 <b-table-column label="link">
-                    <button v-if="props.row.id === 'processing'" class="button is-white is-loading" disabled> Processing </button>
-                    <a v-else :href="props.row.info.link" target="_blank">{{ props.row.info.link}}</a>
+                    <a v-if="props.row.id !== 'processing'" :href="props.row.info.link" target="_blank">{{ props.row.info.link}}</a>
                 </b-table-column>
 
                 <b-table-column label="Video link" centered>
-                    <button v-if="props.row.id === 'processing'" class="button is-white is-loading" disabled> Processing </button>
-                    <a v-else :ref="props.row.info.video" target="_blank">{{ props.row.info.video }}</a>
+                    <a v-if="props.row.id !== 'processing'" :ref="props.row.info.video" target="_blank">{{ props.row.info.video }}</a>
                 </b-table-column>
             </template>
 
@@ -97,6 +94,7 @@ export default {
             project_id: null,
             camera_id: null,
             deploymentLocationID: null,
+            processingData: [],
             tableDataSimple: [],
             isEmpty: true,
             }
@@ -134,7 +132,7 @@ export default {
     methods: {
         showIt(file, response) {
           this.isEmpty = false
-          this.tableDataSimple.push({id: 'processing', info: {link: 'processing', 'filename': file.name}})
+          this.processingData.push({id: 'processing', info: {link: 'processing', 'filename': file.name}})
         },
         apiUrl(id) {
             return "https://instantwildadmin.zsl.org/api/task/" + id
@@ -149,11 +147,15 @@ export default {
       jobStatus (data) {
         console.log('job completed')
         this.isEmpty = false
-        let index = _.findIndex(this.tableDataSimple, function (n) {
+        // let index = _.findIndex(this.processingData, function (n) {
+        //   return n.info.filename === data.task.info.filename
+        // })
+        _.remove(this.processingData, function (n) {
           return n.info.filename === data.task.info.filename
         })
 
-        this.tableDataSimple.splice(index, 1, data.task)
+        // this.tableDataSimple.splice(index, 1, data.task)
+        this.tableDataSimple.push(data.task)
       }
     },
     created(){
