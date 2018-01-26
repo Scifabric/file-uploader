@@ -31,6 +31,13 @@
                 </option>
             </b-select>
         </b-field>
+        <b-field label="Find duplicates">
+          <b-switch v-model="duplicates"
+                  true-value="Yes"
+                  false-value="No">
+                  {{ duplicates }}
+          </b-switch>
+        </b-field>
 
         <dropzone ref="myuploader" id="myVueDropzone" 
                   url="/upload" acceptedFileTypes='image/*,.h264,.mp4'
@@ -42,6 +49,7 @@
                 <input type="hidden" name="camera_id" v-model="camera_id">
                 <input type="hidden" name="room" v-model="room">
                 <input type="hidden" name="deploymentLocationID" v-model="deploymentLocationID">
+                <input type="hidden" name="duplicates" v-model="duplicates">
         </dropzone>
         <h2 class="title is-2" style="margin-top:5px;">List of created tasks <span v-if="processingData.length >= 1" class="tag is-info is-large is-pulled-right">Processing {{processingData.length}} files</span></h2>
         <b-table
@@ -97,6 +105,7 @@ export default {
             processingData: [],
             tableDataSimple: [],
             isEmpty: true,
+            duplicates: 'Yes',
             }
     },
     components: {Dropzone},

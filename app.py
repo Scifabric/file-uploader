@@ -76,6 +76,7 @@ def upload():
     project_name = request.form['project_name']
     camera_id = request.form['camera_id'] or None
     deploymentLocationID = request.form['deploymentLocationID']
+    duplicates = request.form['duplicates']
     room = request.form['room']
     if deploymentLocationID is None or deploymentLocationID == '':
         deploymentLocationID = project_name
@@ -98,7 +99,8 @@ def upload():
                       deploymentLocationID=deploymentLocationID,
                       filename=filename,
                       path=path,
-                      room=room)
+                      room=room,
+                      duplicates=duplicates)
         job = q.enqueue(async_upload, timeout=15*60, **kwargs)
         return jsonify({'jobId': job.id})
     else:

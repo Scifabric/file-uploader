@@ -28,6 +28,7 @@ def async_upload(**kwargs):
     filename = kwargs['filename']
     path = kwargs['path']
     room = kwargs['room']
+    duplicates = kwargs['duplicates']
 
     with open(path) as file:
         mime = magic.from_file(path, mime=True)
@@ -71,7 +72,12 @@ def async_upload(**kwargs):
             except KeyError:
                 exif = 'This image types does not support EXIF'
                 Create_time = None
+
             image_exists, ahash, task = check_exists(path)
+
+            if duplicates == 'No':
+                image_exists = False
+
             if image_exists is False:
                 data_url = upload_to_s3(path, filename)
                 tmp = dict(project_id=project_id,
