@@ -47,8 +47,12 @@ def async_upload(**kwargs):
                        content_type="video/mp4",
                        deploymentLocationID=deploymentLocationID)
             task = create_task(pbclient, **tmp)
-            return jsonify(dict(status='ok', exif=None,
-                                task=task.__dict__['data']))
+            final = dict(status='ok', exif=None,
+                         task=task.__dict__['data'],
+                         room=room)
+            sio.emit('jobcompleted', final)
+            return final
+
         else:
             try:
                 # Get from Exif DateTimeOriginal
