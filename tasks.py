@@ -24,9 +24,8 @@ import time
 import calendar
 
 
-def create_task(pbclient, **kwargs):
-    """Create a task."""
-
+def snooze():
+    """Snooze the job."""
     url = '%s/api/task?api_key=%s' % (settings.SERVER_NAME,
                                       settings.APIKEY)
     res = requests.get(url)
@@ -35,6 +34,12 @@ def create_task(pbclient, **kwargs):
         remaining = (calendar.timegm(time.gmtime()) -
                      res.headers['X-RateLimit-Reset'])
         time.sleep(remaining)
+
+
+def create_task(pbclient, **kwargs):
+    """Create a task."""
+
+    snooze()
 
     if kwargs.get('Create_time') is None:
         now = datetime.datetime.utcnow().isoformat()
@@ -60,6 +65,7 @@ def create_task(pbclient, **kwargs):
     return pbclient.create_task(kwargs['project_id'],
                                 info=info)
 
+
 def get_ahash(data):
     """Generates image ahash."""
     img = Image.open(data)
@@ -69,6 +75,9 @@ def get_ahash(data):
 
 def check_exists(data):
     """Check if exists already."""
+
+    snooze()
+
     ahash = get_ahash(data)
     query = 'ahash::%s' % ahash
     url = settings.SERVER_NAME + '/api/task'
@@ -76,7 +85,7 @@ def check_exists(data):
                   info=query,
                   fulltextsearch=1,
                   all=1)
-    response = requests.get(url, params=params)
+    res = requests.get(url, params=params)
     if len(response.json()) >= 1:
         task = response.json()[0]
         return True, ahash, task
