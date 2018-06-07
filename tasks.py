@@ -30,9 +30,9 @@ def snooze():
                                       settings.APIKEY)
     res = requests.get(url)
 
-    if res.headers['X-RateLimit-Remaining'] < 50:
-        remaining = (calendar.timegm(time.gmtime()) -
-                     res.headers['X-RateLimit-Reset'])
+    if (res.status_code == 429 or res.headers['X-RateLimit-Remaining'] < 50):
+        remaining = (int(res.headers['X-RateLimit-Reset']) -
+                     calendar.timegm(time.gmtime()))
         time.sleep(remaining)
 
 
@@ -86,8 +86,8 @@ def check_exists(data):
                   fulltextsearch=1,
                   all=1)
     res = requests.get(url, params=params)
-    if len(response.json()) >= 1:
-        task = response.json()[0]
+    if len(res.json()) >= 1:
+        task = res.json()[0]
         return True, ahash, task
     else:
         return False, ahash, None
