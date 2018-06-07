@@ -1,4 +1,8 @@
 <template>
+  <div>
+    <div class="mynavar" :class="{invisible: processingData.length <=0}">
+      <span  class="tag is-info is-large is-pulled-right" style="border-radius:0px;">Completed {{tableDataSimple.length}} images</span>
+    </div>
     <div class="container">
         <h1 class="title is-1">Upload pictures or videos to PYBOSSA</h1>
         <b-field label="Project Name">
@@ -51,7 +55,7 @@
                 <input type="hidden" name="deploymentLocationID" v-model="deploymentLocationID">
                 <input type="hidden" name="duplicates" v-model="duplicates">
         </dropzone>
-        <h2 class="title is-2" style="margin-top:5px;">List of created tasks <span v-if="processingData.length >= 1" class="tag is-info is-large is-pulled-right">Processing {{processingData.length}} files</span></h2>
+        <h2 class="title is-2" style="margin-top:5px;">{{tableDataSimple.length}} created tasks </h2>
         <b-table
             :data="isEmpty ? [] : tableDataSimple"
             >
@@ -85,6 +89,7 @@
             </template>
         </b-table>
     </div>
+  </div>
 </template>
 <script>
 import Dropzone from 'vue2-dropzone'
@@ -190,4 +195,16 @@ export default {
 }
 </script>
 <style>
+.mynavar {
+  position: fixed;
+  top: 0;
+  width: 100%;
+  background: black;
+  color: white;
+  z-index: 90;
+  left: 0;
+}
+.invisible {
+  visibility: hidden;
+}
 </style>
