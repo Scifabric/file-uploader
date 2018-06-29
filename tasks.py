@@ -63,6 +63,7 @@ def create_task(pbclient, **kwargs):
                 Create_time=kwargs['Create_time'],
                 deploymentLocationID=kwargs['deploymentLocationID'])
     return pbclient.create_task(kwargs['project_id'],
+                                n_answers=5,
                                 info=info)
 
 
