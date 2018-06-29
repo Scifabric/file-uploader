@@ -30,10 +30,11 @@ def snooze():
                                       settings.APIKEY)
     res = requests.get(url)
 
-    if (res.status_code == 429 or res.headers['X-RateLimit-Remaining'] < 50):
+    if (res.status_code == 429):
+        print "we have to wait"
         remaining = (int(res.headers['X-RateLimit-Reset']) -
                      calendar.timegm(time.gmtime()))
-        time.sleep(remaining)
+        time.sleep(remaining + 120)
 
 
 def create_task(pbclient, **kwargs):
@@ -87,6 +88,7 @@ def check_exists(data):
                   fulltextsearch=1,
                   all=1)
     res = requests.get(url, params=params)
+    print res.json()
     if len(res.json()) >= 1:
         task = res.json()[0]
         return True, ahash, task

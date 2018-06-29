@@ -107,7 +107,7 @@ def upload():
                       path=path,
                       room=room,
                       duplicates=duplicates)
-        job = q.enqueue(async_upload, timeout=20*60, **kwargs)
+        job = q.enqueue(async_upload, timeout=15*60, **kwargs)
         return jsonify({'jobId': job.id})
     else:
         return "ERROR"
