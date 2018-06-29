@@ -33,13 +33,19 @@ from rq import Queue
 from rq.queue import FailedQueue
 from jobs import async_upload
 from flask_socketio import SocketIO, send, emit, join_room, leave_room
+import rq_dashboard
+
 
 app = Flask(__name__)
 
+app.config.from_object(rq_dashboard.default_settings)
+app.register_blueprint(rq_dashboard.blueprint, url_prefix="/rq")
+
+
 socketio = SocketIO(app)
 
-q = Queue(connection=Redis())
-fq = FailedQueue(connection=Redis())
+q = Queue(connection=Redis(db=settings.REDIS_DB))
+fq = FailedQueue(connection=Redis(db=settings.REDIS_DB))
 
 pbclient.set('api_key', settings.APIKEY)
 pbclient.set('endpoint', settings.SERVER_NAME)
